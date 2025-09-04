@@ -1,0 +1,10 @@
+{
+  "total_rows": 5000000,
+  "total_sales_amount": 6655290246385.539,
+  "min_price": 9.33,
+  "max_price": 668.27,
+  "avg_price": 266.19061614200007,
+  "num_workers": 3,
+  "analysis_timestamp": "2025-09-05T03:24:02.175070",
+  "analysis_date": "2025-09-05 03:24:02"
+}

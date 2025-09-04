@@ -259,26 +259,70 @@ class SalesAnalysisServer:
             raise
     
     def generate_final_report(self):
-        """Generate and display final aggregated results"""
+        """Generate and store final aggregated results"""
         try:
             results = self.db_manager.get_aggregated_results()
             
             if results:
-                print("\n" + "="*60)
-                print("DISTRIBUTED SALES ANALYSIS - FINAL RESULTS")
-                print("="*60)
-                print(f"Total Rows Processed: {results['total_rows']:,}")
-                print(f"Total Sales Amount: ${results['total_sales_amount']:,.2f}")
-                print(f"Minimum Price: ${results['min_price']:.2f}")
-                print(f"Maximum Price: ${results['max_price']:.2f}")
-                print(f"Average Price: ${results['avg_price']:.2f}")
-                print(f"Number of Workers: {results['num_workers']}")
-                print("="*60)
+                # Add timestamp to results
+                results['analysis_timestamp'] = datetime.now().isoformat()
+                results['analysis_date'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                
+                # Console output
+                report_text = self._format_report_text(results)
+                print(report_text)
+                
+                # Save to multiple formats
+                self._save_json_report(results)
+                self._save_text_report(report_text)
+                self._save_csv_report(results)
+                
+                self.logger.info("Reports saved to: sales_analysis_report.json, sales_analysis_report.txt, sales_analysis_report.csv")
             else:
                 print("No results found in database")
                 
         except Exception as e:
             self.logger.error(f"Failed to generate report: {e}")
+    
+    def _format_report_text(self, results: Dict) -> str:
+        """Format results as readable text"""
+        return f"""
+{'='*60}
+DISTRIBUTED SALES ANALYSIS - FINAL RESULTS
+{'='*60}
+Analysis Date: {results['analysis_date']}
+Total Rows Processed: {results['total_rows']:,}
+Total Sales Amount: ${results['total_sales_amount']:,.2f}
+Minimum Price: ${results['min_price']:.2f}
+Maximum Price: ${results['max_price']:.2f}
+Average Price: ${results['avg_price']:.2f}
+Number of Workers: {results['num_workers']}
+{'='*60}
+"""
+    
+    def _save_json_report(self, results: Dict):
+        """Save results as JSON file"""
+        with open('sales_analysis_report.json', 'w') as f:
+            json.dump(results, f, indent=2, default=str)
+    
+    def _save_text_report(self, report_text: str):
+        """Save formatted report as text file"""
+        with open('sales_analysis_report.txt', 'w') as f:
+            f.write(report_text)
+    
+    def _save_csv_report(self, results: Dict):
+        """Save results as CSV file for easy Excel import"""
+        import csv
+        with open('sales_analysis_report.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['Metric', 'Value'])
+            writer.writerow(['Analysis Date', results['analysis_date']])
+            writer.writerow(['Total Rows Processed', f"{results['total_rows']:,}"])
+            writer.writerow(['Total Sales Amount', f"${results['total_sales_amount']:,.2f}"])
+            writer.writerow(['Minimum Price', f"${results['min_price']:.2f}"])
+            writer.writerow(['Maximum Price', f"${results['max_price']:.2f}"])
+            writer.writerow(['Average Price', f"${results['avg_price']:.2f}"])
+            writer.writerow(['Number of Workers', results['num_workers']])
 
 
 class SalesAnalysisWorker:
