@@ -214,7 +214,7 @@ class SalesAnalysisServer:
             client_socket.close()
             self.logger.info(f"Connection with {worker_id} closed")
     
-    def run_server(self, csv_path: str, max_workers: int = 4):
+    def run_server(self, csv_path: str, max_workers):
         """Run the server to coordinate analysis"""
         try:
             # Clear previous results
